@@ -383,6 +383,12 @@
                     </ul>
 
                     <p style="margin-top: 10px;"><strong>Services AWS :</strong> CloudFormation, Config, CloudTrail, CloudWatch</p>
+
+                    <div class="tip-box" style="margin-top: 15px;">
+                        <strong>📝 Exemple concret :</strong> Une équipe configure manuellement chaque nouveau serveur via la console AWS (clic par clic), ce qui prend 2h et génère des erreurs de configuration différentes à chaque fois.
+                        <br><strong>→ Application du pilier :</strong> Décrire le serveur dans un template CloudFormation. Chaque déploiement devient identique, reproductible en 5 minutes, et versionné dans Git comme du code source.
+                        <br><strong>Scénario type examen :</strong> "Une entreprise veut s'assurer que tous ses environnements (dev, staging, prod) ont une configuration identique." → Réponse attendue : Infrastructure as Code (CloudFormation).
+                    </div>
                 </div>
 
                 <div class="detail-box">
@@ -400,6 +406,12 @@
                     </ul>
 
                     <p style="margin-top: 10px;"><strong>Services AWS :</strong> IAM, KMS, GuardDuty, Security Hub, WAF</p>
+
+                    <div class="tip-box" style="margin-top: 15px;">
+                        <strong>📝 Exemple concret :</strong> Un développeur reçoit des accès "Administrateur complet" sur AWS juste pour pouvoir lire des logs CloudWatch dans son projet.
+                        <br><strong>→ Application du pilier :</strong> Créer une politique IAM qui n'autorise QUE la lecture des logs de ce projet précis (moindre privilège). Si son compte est compromis, l'attaquant ne peut rien faire d'autre que lire ces logs.
+                        <br><strong>Scénario type examen :</strong> "Un utilisateur a accidentellement supprimé une base de données car il avait trop de droits." → Le problème vient d'une violation du principe du moindre privilège.
+                    </div>
                 </div>
 
                 <div class="detail-box">
@@ -424,6 +436,12 @@
                     </ul>
 
                     <p style="margin-top: 10px;"><strong>Services AWS :</strong> Route 53, ELB, Auto Scaling, Backup</p>
+
+                    <div class="tip-box" style="margin-top: 15px;">
+                        <strong>📝 Exemple concret :</strong> Une application tourne sur une seule instance EC2 dans une seule AZ. Si cette AZ subit une panne (incendie, coupure réseau), le site est down pendant des heures.
+                        <br><strong>→ Application du pilier :</strong> Déployer au moins 2 instances dans 2 AZ différentes derrière un Load Balancer + Auto Scaling Group. Si une AZ tombe, l'autre continue de servir le trafic automatiquement.
+                        <br><strong>Scénario type examen :</strong> "Une entreprise doit garantir 99.99% de disponibilité même en cas de panne d'un data center entier." → Réponse attendue : architecture Multi-AZ.
+                    </div>
                 </div>
 
                 <div class="detail-box">
@@ -440,6 +458,12 @@
                     </ul>
 
                     <p style="margin-top: 10px;"><strong>5 domaines :</strong> Calcul, Stockage, Base de données, Réseau, Revue continue</p>
+
+                    <div class="tip-box" style="margin-top: 15px;">
+                        <strong>📝 Exemple concret :</strong> Une entreprise paie pour une grosse instance EC2 qui tourne 24/7, mais qui ne traite des requêtes que 10 minutes par jour.
+                        <br><strong>→ Application du pilier :</strong> Remplacer par AWS Lambda (serverless) : aucune ressource ne tourne en dehors des 10 minutes d'usage réel, et la facturation suit l'usage exact à la milliseconde.
+                        <br><strong>Scénario type examen :</strong> "Une fonction de traitement d'image s'exécute de façon imprévisible, parfois 0 fois par jour, parfois 1000 fois." → Réponse attendue : architecture serverless (Lambda) plutôt que des serveurs EC2 permanents.
+                    </div>
                 </div>
 
                 <div class="detail-box">
@@ -462,6 +486,12 @@
                         <li>Savings Plans : Flexibilité + économies</li>
                         <li>Arrêter ressources inutilisées</li>
                     </ul>
+
+                    <div class="tip-box" style="margin-top: 15px;">
+                        <strong>📝 Exemple concret :</strong> Une entreprise a 50 instances On-Demand qui tournent en permanence depuis 2 ans pour une charge stable et prévisible — elle paie donc le prix plein, jour après jour.
+                        <br><strong>→ Application du pilier :</strong> Acheter des Reserved Instances ou un Savings Plan d'1 à 3 ans pour cette charge stable connue, réduisant la facture jusqu'à 72% sans rien changer techniquement.
+                        <br><strong>Scénario type examen :</strong> "Une entreprise utilise des serveurs de batch tolérants aux interruptions, qui peuvent redémarrer si coupés." → Réponse attendue : Spot Instances (le scénario "tolérant aux interruptions" est le signal-clé).
+                    </div>
                 </div>
 
                 <div class="detail-box">
@@ -478,6 +508,74 @@
                         <li><strong>Réduire impact aval :</strong> Compression, caching</li>
                     </ul>
                 </div>
+            </div>
+
+            
+            <h3><span class="icon">🚚</span>1.3 Stratégies de Migration - Les 7 R</h3>
+
+            <div class="info-box">
+                <strong>Définition :</strong> Les "7 R" décrivent les 7 stratégies possibles pour migrer une application existante vers AWS, du plus simple/rapide au plus transformateur.
+            </div>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>Stratégie</th>
+                    <th>Description</th>
+                    <th>Effort</th>
+                    <th>Exemple</th>
+                </tr>
+                <tr>
+                    <td><strong>1. Rehost</strong><br>(Lift and Shift)</td>
+                    <td>Déplacer l'application telle quelle vers AWS, sans aucune modification du code</td>
+                    <td>🟢 Faible</td>
+                    <td>Migrer un serveur on-premises vers une instance EC2 équivalente</td>
+                </tr>
+                <tr>
+                    <td><strong>2. Replatform</strong><br>(Lift, Tinker and Shift)</td>
+                    <td>Quelques optimisations ciblées pendant la migration, sans changer l'architecture globale</td>
+                    <td>🟡 Moyen</td>
+                    <td>Migrer une base de données on-premises vers Amazon RDS (le moteur reste identique, mais AWS gère désormais l'infrastructure)</td>
+                </tr>
+                <tr>
+                    <td><strong>3. Repurchase</strong><br>(Drop and Shop)</td>
+                    <td>Abandonner l'ancienne solution et racheter une nouvelle solution SaaS</td>
+                    <td>🟡 Moyen</td>
+                    <td>Remplacer un CRM auto-hébergé par Salesforce</td>
+                </tr>
+                <tr>
+                    <td><strong>4. Refactor</strong><br>(Re-architect)</td>
+                    <td>Repenser entièrement l'architecture de l'application pour exploiter pleinement le cloud (microservices, serverless...)</td>
+                    <td>🔴 Élevé</td>
+                    <td>Transformer une application monolithique en architecture microservices avec Lambda et DynamoDB</td>
+                </tr>
+                <tr>
+                    <td><strong>5. Retire</strong></td>
+                    <td>Identifier et supprimer des applications devenues inutiles, ne pas les migrer du tout</td>
+                    <td>🟢 Aucun</td>
+                    <td>Arrêter un outil interne que plus personne n'utilise</td>
+                </tr>
+                <tr>
+                    <td><strong>6. Retain</strong><br>(Revisit)</td>
+                    <td>Garder l'application on-premises pour le moment (pas encore prête à migrer, contrainte réglementaire...)</td>
+                    <td>⚪ Aucun</td>
+                    <td>Conserver une application legacy critique tant qu'elle n'est pas documentée</td>
+                </tr>
+                <tr>
+                    <td><strong>7. Relocate</strong></td>
+                    <td>Déplacer l'infrastructure (souvent des VM VMware) vers AWS sans changer d'outils de gestion ni racheter du matériel</td>
+                    <td>🟢 Faible</td>
+                    <td>Migrer un parc VMware vers VMware Cloud on AWS</td>
+                </tr>
+            </table>
+
+            <div class="tip-box">
+                <strong>💡 À retenir pour l'examen :</strong>
+                <ul style="margin-top: 10px;">
+                    <li><strong>Rehost</strong> = le plus rapide, le plus courant en première vague de migration</li>
+                    <li><strong>Refactor</strong> = le plus long et coûteux, mais le plus grand bénéfice cloud à terme</li>
+                    <li><strong>Retire</strong> et <strong>Retain</strong> = les deux seules stratégies où l'application ne va PAS sur AWS (immédiatement)</li>
+                    <li>Une question scénario décrit souvent une contrainte (budget, temps, besoin de modernisation) → identifiez quelle stratégie correspond</li>
+                </ul>
             </div>
 
             <div class="tip-box">
