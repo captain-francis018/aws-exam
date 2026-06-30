@@ -28,30 +28,66 @@ function registerServiceWorker() {
 function setupInstallPrompt() {
     const banner = document.getElementById('installBanner');
     const button = document.getElementById('installButton');
+    const message = banner ? banner.querySelector('p') : null;
     if (!banner || !button) return;
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) {
+        banner.hidden = true;
+        return;
+    }
+
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    const showFallbackMessage = (text) => {
+        if (message) {
+            message.textContent = text;
+        }
+        banner.hidden = false;
+    };
 
     window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
         deferredPrompt = event;
+        if (message) {
+            message.textContent = 'Ajoutez cette formation à votre écran d’accueil pour l’utiliser hors ligne et plus rapidement sur votre téléphone.';
+        }
+        button.textContent = 'Installer';
         banner.hidden = false;
     });
 
     button.addEventListener('click', async () => {
-        if (!deferredPrompt) {
-            banner.hidden = true;
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                banner.hidden = true;
+            }
+            deferredPrompt = null;
             return;
         }
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            banner.hidden = true;
+
+        if (isIOS) {
+            showFallbackMessage('Sur iPhone ou iPad, ouvrez le menu Partager puis choisissez “Ajouter à l’écran d’accueil”.');
+        } else if (isAndroid) {
+            showFallbackMessage('Sur Android, ouvrez le menu du navigateur puis choisissez “Ajouter à l’écran d’accueil”.');
+        } else {
+            showFallbackMessage('L’installation n’est pas disponible dans ce navigateur. Essayez Chrome ou Edge sur mobile.');
         }
-        deferredPrompt = null;
     });
 
     window.addEventListener('appinstalled', () => {
         banner.hidden = true;
     });
+
+    if (isIOS) {
+        showFallbackMessage('Sur iPhone ou iPad, ouvrez le menu Partager puis choisissez “Ajouter à l’écran d’accueil”.');
+    } else if (isAndroid) {
+        showFallbackMessage('Sur Android, ouvrez le menu du navigateur puis choisissez “Ajouter à l’écran d’accueil”.');
+    } else {
+        showFallbackMessage('L’installation n’est pas disponible dans ce navigateur. Essayez Chrome ou Edge sur mobile.');
+    }
 }
 
 function setupDifficultySelector() {
