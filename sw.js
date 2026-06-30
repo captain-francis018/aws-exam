@@ -1,11 +1,11 @@
-const CACHE_NAME = 'aws-exam-v1';
+const CACHE_NAME = 'aws-exam-v2';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css',
-  './app.js',
-  './manifest.json',
-  './icon.svg'
+  './styles.css?v=2',
+  './app.js?v=2',
+  './manifest.json?v=2',
+  './icon.svg?v=2'
 ];
 
 self.addEventListener('install', event => {
