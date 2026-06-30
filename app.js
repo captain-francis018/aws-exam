@@ -12,7 +12,16 @@ let currentExamQuestions = [];
 document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupDifficultySelector();
+    registerServiceWorker();
 });
+
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+    }
+}
 
 function setupDifficultySelector() {
     const buttons = document.querySelectorAll('.difficulty-option');

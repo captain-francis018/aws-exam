@@ -1,0 +1,18 @@
+{
+  "name": "AWS Cloud Practitioner CLF-C02",
+  "short_name": "AWS Exam",
+  "description": "Formation complète, QCM et examen blanc pour l'examen AWS Cloud Practitioner CLF-C02",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#8E7CFF",
+  "theme_color": "#8E7CFF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -45,6 +45,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     color: var(--secondary-color);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .container {
@@ -876,7 +877,20 @@ pre {
 
 @media (max-width: 768px) {
     body {
-        padding: 8px;
+        padding: 6px;
+    }
+
+    .container {
+        border-radius: 18px;
+    }
+
+    .header {
+        padding: 18px 14px;
+    }
+
+    .nav-tabs {
+        padding: 6px 6px 8px;
+        gap: 6px;
     }
 
     .nav-tab {
@@ -925,11 +939,17 @@ pre {
     .detail-box, .tip-box, .warning-box, .info-box {
         padding: 14px;
         font-size: 0.95em;
+        word-break: break-word;
     }
 
     .option {
         padding: 12px;
         font-size: 0.95em;
+        align-items: flex-start;
+    }
+
+    .option label {
+        line-height: 1.4;
     }
 
     .quiz-container {
@@ -952,6 +972,25 @@ pre {
 @media (max-width: 420px) {
     .header h1 {
         font-size: 1.3em;
+    }
+
+    .header .emoji {
+        font-size: 1.8em;
+    }
+
+    .content {
+        padding: 12px;
+    }
+
+    .nav-tab {
+        padding: 9px 10px;
+        font-size: 0.76em;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 8px;
+        font-size: 0.82em;
     }
 
     .header .subtitle {
