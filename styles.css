@@ -20,8 +20,9 @@ body {
     font-family: 'Amazon Ember', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
-    padding: 20px;
+    padding: clamp(8px, 3vw, 20px);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 .container {
@@ -35,13 +36,13 @@ body {
 
 .header {
     background: linear-gradient(135deg, var(--primary-color) 0%, #FF6B6B 100%);
-    padding: 40px;
+    padding: clamp(20px, 5vw, 40px);
     text-align: center;
     color: white;
 }
 
 .header .emoji {
-    font-size: 4em;
+    font-size: clamp(2.2em, 6vw, 4em);
     margin-bottom: 15px;
     animation: float 3s ease-in-out infinite;
 }
@@ -52,20 +53,21 @@ body {
 }
 
 .header h1 {
-    font-size: 3em;
+    font-size: clamp(1.5em, 5vw, 3em);
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     font-weight: 700;
+    word-wrap: break-word;
 }
 
 .header .subtitle {
-    font-size: 1.3em;
+    font-size: clamp(0.95em, 2.5vw, 1.3em);
     margin-bottom: 10px;
     opacity: 0.95;
 }
 
 .header .version {
-    font-size: 0.95em;
+    font-size: clamp(0.8em, 2vw, 0.95em);
     opacity: 0.85;
     font-style: italic;
 }
@@ -74,18 +76,20 @@ body {
     display: flex;
     background: #f8f9fa;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border-bottom: 3px solid #dee2e6;
     position: sticky;
     top: 0;
     z-index: 100;
+    scrollbar-width: thin;
 }
 
 .nav-tab {
-    padding: 20px 30px;
+    padding: clamp(12px, 2vw, 20px) clamp(14px, 2.5vw, 30px);
     cursor: pointer;
     border: none;
     background: transparent;
-    font-size: 1.05em;
+    font-size: clamp(0.85em, 2vw, 1.05em);
     font-weight: 600;
     color: #6c757d;
     transition: all 0.3s;
@@ -115,7 +119,7 @@ body {
 }
 
 .content {
-    padding: 40px;
+    padding: clamp(16px, 4vw, 40px);
     min-height: 500px;
 }
 
@@ -258,8 +262,20 @@ body {
     margin: 25px 0;
     background: white;
     border-radius: 10px;
-    overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .comparison-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 10px;
+    }
+    .comparison-table th,
+    .comparison-table td {
+        white-space: nowrap;
+    }
 }
 
 .comparison-table th {
@@ -651,36 +667,39 @@ pre {
 
 @media (max-width: 768px) {
     body {
-        padding: 10px;
-    }
-
-    .header h1 {
-        font-size: 2em;
-    }
-
-    .header .emoji {
-        font-size: 3em;
+        padding: 8px;
     }
 
     .nav-tab {
-        padding: 15px 20px;
-        font-size: 0.95em;
+        padding: 12px 16px;
+        font-size: 0.9em;
     }
 
     .content {
-        padding: 20px;
+        padding: 16px;
     }
 
     .module-card {
-        padding: 20px;
+        padding: 18px;
+        margin-bottom: 20px;
+    }
+
+    .module-card h2 {
+        font-size: 1.4em;
+    }
+
+    .module-card h3 {
+        font-size: 1.15em;
     }
 
     .timer {
-        top: 10px;
-        right: 10px;
-        padding: 15px;
-        font-size: 1.3em;
-        min-width: 150px;
+        top: 8px;
+        right: 8px;
+        left: 8px;
+        padding: 12px;
+        font-size: 1.1em;
+        min-width: auto;
+        text-align: center;
     }
 
     .stats-grid {
@@ -690,6 +709,59 @@ pre {
     .btn {
         width: 100%;
         margin: 8px 0;
+        padding: 14px 20px;
+        font-size: 1em;
+    }
+
+    .detail-box, .tip-box, .warning-box, .info-box {
+        padding: 14px;
+        font-size: 0.95em;
+    }
+
+    .option {
+        padding: 12px;
+        font-size: 0.95em;
+    }
+
+    .quiz-container {
+        padding: 16px;
+    }
+
+    .score-card {
+        padding: 24px 16px;
+    }
+
+    .score-card h2 {
+        font-size: 2.2em;
+    }
+
+    #difficultySelector {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 420px) {
+    .header h1 {
+        font-size: 1.3em;
+    }
+
+    .header .subtitle {
+        font-size: 0.85em;
+    }
+
+    .nav-tab {
+        padding: 10px 12px;
+        font-size: 0.8em;
+    }
+
+    .module-card h2 {
+        font-size: 1.2em;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 10px;
+        font-size: 0.9em;
     }
 }
 
@@ -697,4 +769,70 @@ pre {
     .nav-tabs, .btn, .timer {
         display: none;
     }
+}
+
+/* Sélecteur de difficulté (examen blanc) */
+.difficulty-option {
+    border-color: #e2e8f0;
+    background: #fff;
+    cursor: pointer;
+}
+.difficulty-option:hover {
+    border-color: #FF9900;
+}
+.difficulty-option.active {
+    border-color: #FF9900;
+    background: #fff8ee;
+    box-shadow: 0 2px 8px rgba(255,153,0,0.15);
+}
+.difficulty-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75em;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.difficulty-badge.facile { background: #d1fae5; color: #065f46; }
+.difficulty-badge.moyen { background: #fef3c7; color: #92400e; }
+.difficulty-badge.difficile { background: #fee2e2; color: #991b1b; }
+.scenario-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75em;
+    font-weight: 700;
+    margin-bottom: 8px;
+    margin-left: 6px;
+    background: #ede9fe;
+    color: #5b21b6;
+}
+.scenario-divider {
+    text-align: center;
+    margin: 40px 0 20px;
+    padding-top: 20px;
+    border-top: 3px dashed #cbd5e0;
+    color: #5b21b6;
+    font-weight: 700;
+    font-size: 1.2em;
+}
+
+.review-filter-btn {
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 2px solid #e2e8f0;
+    background: #fff;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.review-filter-btn:hover {
+    border-color: #FF9900;
+}
+.review-filter-btn.active {
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
 }
