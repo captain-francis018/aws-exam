@@ -46,6 +46,7 @@ body {
     overflow-x: hidden;
     color: var(--secondary-color);
     -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
 }
 
 .container {
@@ -280,6 +281,30 @@ body {
 
 .nav-toggle[aria-expanded="true"] .nav-toggle-icon {
     transform: rotate(90deg);
+}
+
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px clamp(8px, 2vw, 16px) 6px;
+    background: #f8f5ff;
+    flex-wrap: wrap;
+}
+
+.quick-action {
+    border: none;
+    background: linear-gradient(135deg, var(--accent-color), #6F5BD0);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.8em;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(142,124,255,0.25);
+}
+
+.quick-action:hover {
+    transform: translateY(-1px);
 }
 
 .nav-tabs {

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDifficultySelector();
     registerServiceWorker();
     setupInstallPrompt();
+    setupKeyboardShortcuts();
 });
 
 function registerServiceWorker() {
@@ -88,6 +89,31 @@ function setupInstallPrompt() {
     } else {
         showFallbackMessage('L’installation n’est pas disponible dans ce navigateur. Essayez Chrome ou Edge sur mobile.');
     }
+}
+
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+        const key = event.key.toLowerCase();
+        const shortcuts = {
+            h: 'accueil',
+            q: 'qcm',
+            e: 'simulation',
+            c: 'module1',
+            s: 'module2'
+        };
+
+        if (event.target && ['input', 'textarea', 'select'].includes(event.target.tagName.toLowerCase())) {
+            return;
+        }
+
+        if (shortcuts[key]) {
+            event.preventDefault();
+            loadContent(shortcuts[key]);
+            document.querySelectorAll('.nav-tab, .quick-action').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === shortcuts[key]);
+            });
+        }
+    });
 }
 
 function setupDifficultySelector() {
