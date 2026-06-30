@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     registerServiceWorker();
     setupInstallPrompt();
     setupKeyboardShortcuts();
+    setupScrollToNavButton();
 });
 
 function registerServiceWorker() {
@@ -89,6 +90,25 @@ function setupInstallPrompt() {
     } else {
         showFallbackMessage('L’installation n’est pas disponible dans ce navigateur. Essayez Chrome ou Edge sur mobile.');
     }
+}
+
+function setupScrollToNavButton() {
+    const button = document.getElementById('scrollToNavBtn');
+    const nav = document.getElementById('navTabs');
+    if (!button || !nav) return;
+
+    const toggleButton = () => {
+        const shouldShow = window.scrollY > 250;
+        button.classList.toggle('show', shouldShow);
+    };
+
+    window.addEventListener('scroll', toggleButton, { passive: true });
+    toggleButton();
+
+    button.addEventListener('click', () => {
+        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollBy({ top: -8, behavior: 'smooth' });
+    });
 }
 
 function setupKeyboardShortcuts() {
