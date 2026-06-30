@@ -9,10 +9,16 @@ let examAnswers = {};
 let selectedDifficulty = 'mixte';
 let currentExamQuestions = [];
 let deferredPrompt = null;
+let learningProgressState = [];
+let currentLearningStep = -1;
+let currentLearningTab = 'accueil';
+const LEARNING_PROGRESS_KEY = 'awsExamLearningProgress';
+const LEARNING_PROGRESS_SESSION_KEY = 'awsExamLearningProgressSession';
 
 document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupDifficultySelector();
+    setupLearningProgress();
     registerServiceWorker();
     setupInstallPrompt();
     setupKeyboardShortcuts();
@@ -158,6 +164,8 @@ function setupDifficultySelector() {
 // ===== NAVIGATION (simple bascule d'affichage, contenu déjà dans le DOM) =====
 function setupNavigation() {
     const tabs = document.querySelectorAll('.nav-tab');
+    const quickActions = document.querySelectorAll('.quick-action');
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabId = tab.getAttribute('data-tab');
@@ -166,9 +174,171 @@ function setupNavigation() {
             tab.classList.add('active');
         });
     });
+
+    quickActions.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            loadContent(tabId);
+            tabs.forEach(t => t.classList.remove('active'));
+            const matchingTab = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
+            if (matchingTab) matchingTab.classList.add('active');
+        });
+    });
 }
 
-function loadContent(tabId) {
+function setupLearningProgress() {
+    const steps = document.querySelectorAll('.progress-step');
+    const resetButton = document.getElementById('resetLearningProgressBtn');
+    if (!steps.length) return;
+
+    const savedState = loadLearningProgressState();
+    if (savedState.steps && savedState.steps.length) {
+        learningProgressState = savedState.steps;
+        currentLearningStep = savedState.currentStep;
+        currentLearningTab = savedState.lastTab || 'accueil';
+    }
+
+    steps.forEach(step => {
+        step.addEventListener('click', () => {
+            const target = step.getAttribute('data-target');
+            if (target) {
+                loadContent(target);
+                markLearningStep(target);
+            }
+        });
+    });
+
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            if (window.confirm('Réinitialiser la progression du parcours ?')) {
+                resetLearningProgress();
+            }
+        });
+    }
+
+    const restoredTab = currentLearningTab && document.getElementById(`section-${currentLearningTab}`) ? currentLearningTab : 'accueil';
+    if (restoredTab !== 'accueil') {
+        loadContent(restoredTab, { persist: false, scroll: false });
+    }
+
+    renderLearningProgress();
+}
+
+function loadLearningProgressState() {
+    try {
+        const sessionState = sessionStorage.getItem(LEARNING_PROGRESS_SESSION_KEY);
+        if (sessionState) {
+            return JSON.parse(sessionState);
+        }
+    } catch (error) {
+        console.warn('Impossible de lire la progression de session', error);
+    }
+
+    try {
+        const storedState = localStorage.getItem(LEARNING_PROGRESS_KEY);
+        if (storedState) {
+            return JSON.parse(storedState);
+        }
+    } catch (error) {
+        console.warn('Impossible de lire la progression sauvegardée', error);
+    }
+
+    return { steps: [], currentStep: -1, lastTab: 'accueil' };
+}
+
+function saveLearningProgressState() {
+    const payload = {
+        steps: learningProgressState,
+        currentStep: currentLearningStep,
+        lastTab: currentLearningTab
+    };
+
+    try {
+        sessionStorage.setItem(LEARNING_PROGRESS_SESSION_KEY, JSON.stringify(payload));
+        localStorage.setItem(LEARNING_PROGRESS_KEY, JSON.stringify(payload));
+    } catch (error) {
+        console.warn('Impossible d’enregistrer la progression', error);
+    }
+}
+
+function markLearningStep(tabId) {
+    const stepIndex = getLearningStepIndex(tabId);
+    if (stepIndex === -1) return;
+
+    const completedSteps = new Set(learningProgressState);
+    for (let i = 0; i <= stepIndex; i += 1) {
+        completedSteps.add(i);
+    }
+
+    learningProgressState = Array.from(completedSteps).sort((a, b) => a - b);
+    currentLearningStep = stepIndex;
+    currentLearningTab = tabId;
+    saveLearningProgressState();
+    renderLearningProgress();
+}
+
+function resetLearningProgress() {
+    learningProgressState = [];
+    currentLearningStep = -1;
+    currentLearningTab = 'accueil';
+
+    try {
+        sessionStorage.removeItem(LEARNING_PROGRESS_SESSION_KEY);
+        localStorage.removeItem(LEARNING_PROGRESS_KEY);
+    } catch (error) {
+        console.warn('Impossible de supprimer la progression', error);
+    }
+
+    renderLearningProgress();
+    loadContent('accueil', { persist: false, scroll: false });
+}
+
+function getLearningStepIndex(tabId) {
+    const stepMap = {
+        module1: 0,
+        module2: 1,
+        module3: 2,
+        module4: 3,
+        comparaisons: 4,
+        qcm: 5,
+        scenarios: 5,
+        simulation: 5
+    };
+    return stepMap[tabId] ?? -1;
+}
+
+function renderLearningProgress() {
+    const steps = document.querySelectorAll('.progress-step');
+    if (!steps.length) return;
+
+    const totalSteps = steps.length;
+    const progressPercent = Math.round((learningProgressState.length / totalSteps) * 100);
+    const progressBar = document.getElementById('learningProgressBar');
+    const progressText = document.getElementById('learningProgressText');
+
+    if (progressBar) {
+        progressBar.style.width = `${Math.max(progressPercent, 8)}%`;
+    }
+
+    if (progressText) {
+        progressText.textContent = `${learningProgressState.length}/${totalSteps} étapes terminées`;
+    }
+
+    steps.forEach((step, index) => {
+        const isCompleted = learningProgressState.includes(index);
+        const isCurrent = index === currentLearningStep;
+        step.classList.toggle('completed', isCompleted);
+        step.classList.toggle('current', isCurrent);
+    });
+}
+
+function loadContent(tabId, options = {}) {
+    const { persist = true, scroll = true } = options;
+
+    if (persist) {
+        markLearningStep(tabId);
+    }
+
     document.querySelectorAll('.tab-section').forEach(sec => {
         sec.style.display = 'none';
     });
@@ -176,7 +346,9 @@ function loadContent(tabId) {
     if (target) target.style.display = 'block';
 
     document.getElementById('examTimer').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (scroll) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     if (tabId === 'qcm' && !document.getElementById('quizQuestionsContainer').dataset.loaded) {
         loadQuizQuestions();

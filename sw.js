@@ -18,7 +18,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(keys => Promise.all(keys.map(key => {
       if (key !== CACHE_NAME) return caches.delete(key);
       return null;
-    }))))
+    })))
   );
   self.clients.claim();
 });
