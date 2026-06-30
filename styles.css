@@ -309,7 +309,8 @@ body {
 
 .scroll-to-nav-btn {
     position: fixed;
-    right: 14px;
+    left: 50%;
+    transform: translateX(-50%);
     bottom: 16px;
     width: 46px;
     height: 46px;

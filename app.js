@@ -106,8 +106,8 @@ function setupScrollToNavButton() {
     toggleButton();
 
     button.addEventListener('click', () => {
-        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        window.scrollBy({ top: -8, behavior: 'smooth' });
+        const navTop = nav.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: navTop - 8, behavior: 'auto' });
     });
 }
 
