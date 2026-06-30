@@ -8,11 +8,13 @@ let examTimer = null;
 let examAnswers = {};
 let selectedDifficulty = 'mixte';
 let currentExamQuestions = [];
+let deferredPrompt = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     setupNavigation();
     setupDifficultySelector();
     registerServiceWorker();
+    setupInstallPrompt();
 });
 
 function registerServiceWorker() {
@@ -21,6 +23,35 @@ function registerServiceWorker() {
             navigator.serviceWorker.register('./sw.js').catch(() => {});
         });
     }
+}
+
+function setupInstallPrompt() {
+    const banner = document.getElementById('installBanner');
+    const button = document.getElementById('installButton');
+    if (!banner || !button) return;
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredPrompt = event;
+        banner.hidden = false;
+    });
+
+    button.addEventListener('click', async () => {
+        if (!deferredPrompt) {
+            banner.hidden = true;
+            return;
+        }
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            banner.hidden = true;
+        }
+        deferredPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', () => {
+        banner.hidden = true;
+    });
 }
 
 function setupDifficultySelector() {
