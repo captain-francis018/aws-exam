@@ -1,0 +1,156 @@
+[
+  {
+    "id": 301,
+    "domain": "Architecture",
+    "question": "Une startup de e-commerce s'attend à un pic de trafic important pendant le Black Friday (x20 du trafic normal). Le reste de l'année, le trafic est stable et prévisible. L'application est actuellement sur 5 instances EC2 On-Demand qui tournent 24/7. Quelle stratégie optimiserait les coûts tout en garantissant la disponibilité pendant le pic ?",
+    "options": [
+      "Acheter 20 Reserved Instances pour couvrir le pic",
+      "Utiliser 5 Reserved Instances pour la charge de base + Auto Scaling avec On-Demand pour les pics",
+      "Tout migrer vers Spot Instances pour économiser 90%",
+      "Augmenter manuellement à 20 instances On-Demand avant le Black Friday"
+    ],
+    "correct": 1,
+    "explanation": "Reserved Instances (jusqu'à 72% d'économie) pour la charge de base stable connue (5 instances). Auto Scaling avec On-Demand pour les pics imprévisibles (scaling automatique sans engagement). Spot = risque d'interruption inacceptable pour e-commerce. 20 RI = surcoût énorme 11 mois sur 12.",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 302,
+    "domain": "Sécurité",
+    "question": "Une entreprise de santé doit stocker des dossiers médicaux dans S3 en conformité HIPAA. Les données doivent être chiffrées au repos, et l'entreprise veut contrôler elle-même les clés de chiffrement et leur rotation. Quelle solution répond à ces exigences ?",
+    "options": [
+      "S3 avec chiffrement SSE-S3 (clés gérées par AWS)",
+      "S3 avec chiffrement SSE-KMS et Customer Managed Keys (CMK)",
+      "S3 sans chiffrement + chiffrement applicatif côté client",
+      "S3 avec Object Lock uniquement (sans chiffrement)"
+    ],
+    "correct": 1,
+    "explanation": "SSE-KMS avec Customer Managed Keys (CMK) permet à l'entreprise de gérer ses propres clés de chiffrement, leur rotation, et les politiques d'accès (audit CloudTrail complet). SSE-S3 = clés gérées par AWS (pas de contrôle client). Object Lock = immutabilité, pas de chiffrement.",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 303,
+    "domain": "Disponibilité",
+    "question": "Une application critique doit avoir un RTO (Recovery Time Objective) de 1 heure et un RPO (Recovery Point Objective) de 15 minutes. L'application tourne actuellement dans une seule région AWS. Quelle architecture de disaster recovery est la PLUS adaptée ?",
+    "options": [
+      "Backup & Restore : sauvegardes S3 quotidiennes",
+      "Pilot Light : BD répliquée + serveurs éteints dans région secondaire",
+      "Warm Standby : version réduite active en région secondaire",
+      "Multi-Site Active-Active : réplication complète temps réel"
+    ],
+    "correct": 2,
+    "explanation": "Warm Standby = infrastructure réduite mais ACTIVE dans région secondaire, peut être rapidement mise à l'échelle. RTO < 1h garanti. RPO 15 min = réplication continue possible. Pilot Light = trop lent (RTO 2-4h). Multi-Site = coût x2 inutile. Backup & Restore = RTO 6-24h.",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 304,
+    "domain": "Base de données",
+    "question": "Une application de jeu mobile stocke des scores de joueurs avec des millions de lectures/écritures par seconde, une latence requise < 10ms, et une croissance imprévisible. Les requêtes sont simples (clé-valeur). Quelle base de données est la MIEUX adaptée ?",
+    "options": [
+      "Amazon RDS MySQL Multi-AZ avec Read Replicas",
+      "Amazon Aurora Serverless v2",
+      "Amazon DynamoDB en mode On-Demand",
+      "Amazon ElastiCache Redis"
+    ],
+    "correct": 2,
+    "explanation": "DynamoDB = NoSQL clé-valeur serverless, latence < 10ms garantie, auto-scaling illimité, mode On-Demand (pas de capacity planning). Aurora = relationnel (overkill pour clé-valeur). ElastiCache = cache, pas DB primaire (perte données si redémarrage). RDS = scaling limité.",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 305,
+    "domain": "Sécurité",
+    "question": "Un analyste de sécurité détecte des tentatives de connexion SSH depuis des adresses IP chinoises sur des instances EC2 qui ne devraient accepter que du trafic HTTPS. Aucune intrusion n'a réussi. Quelles actions correctives prendre ? (Sélectionnez DEUX)",
+    "options": [
+      "Modifier le Security Group pour bloquer le port 22 (SSH) depuis Internet",
+      "Activer AWS WAF pour filtrer le trafic SSH",
+      "Activer GuardDuty pour détecter automatiquement les futures tentatives",
+      "Augmenter la taille des instances EC2",
+      "Migrer vers Lambda pour éviter SSH"
+    ],
+    "correct": [0, 2],
+    "type": "multiple",
+    "explanation": "Security Group = firewall instance : bloquer port 22 empêche les tentatives SSH. GuardDuty = détection continue des menaces (alertes sur brute force SSH, IPs malveillantes). WAF = niveau application HTTP/HTTPS uniquement (pas SSH). Taille instance et Lambda = non pertinents.",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 306,
+    "domain": "Coûts",
+    "question": "Une entreprise utilise 50 instances m5.large 24/7 depuis 2 ans pour un ERP. Le workload est stable et prévisible. La facture mensuelle On-Demand est de 3000$. Quelles optimisations réduiraient le plus les coûts ? (Sélectionnez DEUX)",
+    "options": [
+      "Acheter des Reserved Instances Standard 3 ans (72% d'économie)",
+      "Passer à des Spot Instances (90% d'économie)",
+      "Acheter un Savings Plan Compute 1 an",
+      "Utiliser AWS Budgets pour surveiller les coûts",
+      "Arrêter les instances le week-end"
+    ],
+    "correct": [0, 2],
+    "type": "multiple",
+    "explanation": "RI Standard 3 ans = 72% d'économie (840$/mois au lieu de 3000$) pour charge stable 24/7. Savings Plan Compute = flexibilité entre types d'instances + économies similaires. Spot = risque interruption (ERP critique). Budgets = alerte, pas économie. Week-end = ERP doit tourner 24/7.",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 307,
+    "domain": "Réseau",
+    "question": "Une entreprise a un VPC avec un subnet public (10.0.1.0/24) et un privé (10.0.2.0/24). Les instances du subnet privé ne parviennent pas à télécharger des mises à jour depuis Internet. Le subnet public fonctionne. Quelle est la cause PROBABLE et la solution ?",
+    "options": [
+      "Il manque un Internet Gateway → en ajouter un deuxième",
+      "Il manque un NAT Gateway dans le subnet public + route 0.0.0.0/0 vers NAT dans la table de routage du privé",
+      "Le Security Group bloque le trafic sortant → autoriser 0.0.0.0/0",
+      "Il faut attacher une Elastic IP à chaque instance privée"
+    ],
+    "correct": 1,
+    "explanation": "Subnet privé = pas d'accès direct Internet. Solution : NAT Gateway dans subnet PUBLIC + route 0.0.0.0/0 vers NAT dans table routage subnet privé. IGW existe déjà (public fonctionne). Security Group = stateful (sortant autorisé par défaut). EIP = rend instance publique (contradiction).",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 308,
+    "domain": "Migration",
+    "question": "Une entreprise veut migrer une application monolithique .NET Framework qui tourne sur Windows Server 2012 on-premises. L'application utilise des DLL propriétaires et des configurations système spécifiques. Le délai de migration est de 2 semaines. Quelle stratégie des 7R est la PLUS réaliste ?",
+    "options": [
+      "Refactor : ré-architecturer en microservices serverless Lambda",
+      "Replatform : migrer vers Azure App Service",
+      "Rehost : migrer vers EC2 Windows avec AWS Application Migration Service",
+      "Repurchase : remplacer par une solution SaaS équivalente"
+    ],
+    "correct": 2,
+    "explanation": "Rehost (Lift & Shift) = migration telle quelle vers EC2 Windows, rapide (2 semaines faisable avec Application Migration Service). Refactor = mois de dev. Replatform vers Azure = hors périmètre AWS + ré-engineering nécessaire. Repurchase = changement total application.",
+    "difficulty": "difficile",
+    "scenario": true
+  },
+  {
+    "id": 309,
+    "domain": "Conformité",
+    "question": "Une banque européenne doit prouver à son régulateur que AWS respecte les normes PCI-DSS et ISO 27001. Où peut-elle obtenir ces rapports de conformité officiels AWS ?",
+    "options": [
+      "Les télécharger depuis le site public aws.amazon.com/compliance",
+      "Les demander via un ticket au Support AWS",
+      "Les consulter dans AWS Artifact (portail self-service)",
+      "Les obtenir auprès de son Technical Account Manager uniquement"
+    ],
+    "correct": 2,
+    "explanation": "AWS Artifact = portail self-service pour télécharger à la demande les rapports de conformité (SOC, PCI-DSS, ISO, HIPAA, etc.) et les accords (BAA, GDPR DPA). Accès gratuit 24/7 sans passer par le support. Site public = infos générales (pas rapports officiels).",
+    "difficulty": "moyen",
+    "scenario": true
+  },
+  {
+    "id": 310,
+    "domain": "Multi-compte",
+    "question": "Une entreprise a 20 comptes AWS (un par projet). Elle veut centraliser la facturation, appliquer des restrictions globales (ex: interdire de lancer des instances hors EU), et bénéficier de remises de volume. Quel service utiliser ?",
+    "options": [
+      "AWS Control Tower uniquement",
+      "AWS Organizations avec SCP (Service Control Policies)",
+      "IAM Roles inter-comptes pour chaque projet",
+      "AWS Config Rules déployées sur chaque compte"
+    ],
+    "correct": 1,
+    "explanation": "AWS Organizations = gestion multi-comptes centralisée : facturation consolidée (remises volume), SCP (restrictions globales au-dessus IAM), structure OU. Control Tower = setup automatisé d'Organizations (bonus, pas obligation). IAM Roles = accès, pas gouvernance. Config = audit, pas restriction.",
+    "difficulty": "difficile",
+    "scenario": true
+  }
+]

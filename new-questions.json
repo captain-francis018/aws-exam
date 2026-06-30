@@ -1,0 +1,67 @@
+[
+  {
+    "id": 41,
+    "domain": "CAF",
+    "question": "Combien de perspectives compte le AWS Cloud Adoption Framework (CAF) ?",
+    "options": ["4 perspectives", "5 perspectives", "6 perspectives", "7 perspectives"],
+    "correct": 2,
+    "explanation": "Le AWS CAF compte 6 perspectives : 3 perspectives Métier (Business, People, Governance) et 3 perspectives Techniques (Platform, Security, Operations)."
+  },
+  {
+    "id": 42,
+    "domain": "CAF",
+    "question": "Quelle perspective du AWS CAF se concentre sur la formation des équipes et la gestion du changement organisationnel ?",
+    "options": ["Perspective Business", "Perspective People", "Perspective Governance", "Perspective Operations"],
+    "correct": 1,
+    "explanation": "La perspective People se concentre sur la préparation des équipes aux changements culturels et organisationnels : formation, développement des compétences cloud, gestion du changement."
+  },
+  {
+    "id": 43,
+    "domain": "Containers",
+    "question": "Quel service AWS permet d'exécuter des conteneurs Docker SANS gérer les serveurs sous-jacents ?",
+    "options": ["Amazon ECS sur EC2", "AWS Fargate", "Amazon EKS sur EC2", "Amazon EC2 avec Docker installé"],
+    "correct": 1,
+    "explanation": "AWS Fargate est un moteur de calcul serverless pour conteneurs. Vous ne gérez aucune instance EC2 - AWS gère tout l'infrastructure. Fargate fonctionne avec ECS et EKS."
+  },
+  {
+    "id": 44,
+    "domain": "Containers",
+    "question": "Une entreprise a des applications Kubernetes on-premises et veut migrer vers AWS en gardant la même plateforme. Quel service utiliser ?",
+    "options": ["Amazon ECS", "Amazon EKS", "AWS Lambda", "AWS Elastic Beanstalk"],
+    "correct": 1,
+    "explanation": "Amazon EKS (Elastic Kubernetes Service) est un service Kubernetes managé 100% standard. Les applications K8s existantes peuvent migrer vers EKS sans réécriture."
+  },
+  {
+    "id": 45,
+    "domain": "Containers",
+    "question": "Quel service AWS sert de registry Docker privé pour stocker et gérer les images de conteneurs ?",
+    "options": ["Amazon S3", "Amazon ECR", "AWS CodeCommit", "Amazon ECS"],
+    "correct": 1,
+    "explanation": "Amazon ECR (Elastic Container Registry) est un registry Docker privé managé par AWS. Il stocke, gère et sécurise les images de conteneurs avec intégration IAM et scan de vulnérabilités."
+  },
+  {
+    "id": 46,
+    "domain": "Containers",
+    "question": "Quelle est la principale différence entre Amazon ECS et Amazon EKS ?",
+    "options": ["ECS est payant, EKS est gratuit", "ECS utilise Docker, EKS utilise Podman", "ECS est propriétaire AWS, EKS est Kubernetes standard", "ECS est serverless uniquement, EKS nécessite EC2"],
+    "correct": 2,
+    "explanation": "ECS utilise une technologie d'orchestration propriétaire AWS (plus simple mais lock-in). EKS utilise Kubernetes open-source standard (plus complexe mais portable multi-cloud)."
+  },
+  {
+    "id": 47,
+    "domain": "CAF",
+    "question": "Quelles perspectives du AWS CAF appartiennent aux capacités MÉTIER ? (Sélectionnez TROIS)",
+    "options": ["Business", "People", "Governance", "Platform", "Security"],
+    "correct": [0, 1, 2],
+    "type": "multiple",
+    "explanation": "Les 3 perspectives Métier sont : Business (ROI, stratégie), People (formation, changement), Governance (risques, conformité). Les 3 perspectives Techniques sont : Platform, Security, Operations."
+  },
+  {
+    "id": 48,
+    "domain": "Containers",
+    "question": "Une startup veut déployer une application conteneurisée rapidement sans expertise DevOps. Quelle combinaison est la PLUS simple ?",
+    "options": ["EKS sur EC2 (contrôle total)", "ECS sur Fargate (serverless simple)", "ECS sur EC2 (gestion instances)", "Kubernetes auto-hébergé sur EC2"],
+    "correct": 1,
+    "explanation": "ECS sur Fargate est la solution la plus simple : ECS (orchestration simple, propriétaire AWS) + Fargate (serverless, zéro gestion serveur). Idéal pour startups sans DevOps experts."
+  }
+]
