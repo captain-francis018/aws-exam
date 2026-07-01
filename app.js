@@ -6,9 +6,15 @@ let simulationData = window.EMBEDDED_DATA.simulation;
 let scenarioData = window.EMBEDDED_DATA.scenarios || [];
 let examTimer = null;
 let examAnswers = {};
-let selectedDifficulty = 'mixte';
+let selectedDifficulty = 'simulation';
 let currentExamQuestions = [];
+let currentExamMode = selectedDifficulty;
 let deferredPrompt = null;
+const EXAM_MODE_DEDICATED = 'simulation';
+const EXAM_TOTAL_QUESTIONS = 65;
+const EXAM_SCORED_QUESTIONS = 50;
+const EXAM_PASS_PERCENTAGE = 70;
+const PRACTICE_QUESTIONS_PER_MODE = 20;
 let learningProgressState = [];
 let currentLearningStep = -1;
 let currentLearningTab = 'accueil';
@@ -151,12 +157,12 @@ function setupDifficultySelector() {
             selectedDifficulty = btn.getAttribute('data-difficulty');
 
             const hints = {
-                facile: 'Questions de base : définitions, concepts fondamentaux. Idéal pour débuter.',
-                moyen: 'Niveau proche de l\'examen réel CLF-C02 : compréhension appliquée des services.',
-                difficile: 'Scénarios complexes, questions à choix multiples, cas réels approfondis.',
-                mixte: 'Toutes les questions sont incluses, des plus simples aux scénarios les plus complexes (affichés en fin d\'examen).',
+                facile: 'Mode Facile : questions aléatoires de niveau facile.',
+                moyen: 'Mode Moyen : questions aléatoires de niveau moyen.',
+                difficile: 'Mode Difficile : questions aléatoires de niveau difficile.',
+                simulation: 'Mode Simulation réelle : examen AWS Cloud Practitioner réaliste avec questions dédiées.',
             };
-            document.getElementById('difficultyHint').textContent = hints[selectedDifficulty];
+            document.getElementById('difficultyHint').textContent = hints[selectedDifficulty] || 'Choisissez un mode de simulation.';
         });
     });
 }
@@ -298,11 +304,12 @@ function getLearningStepIndex(tabId) {
         module1: 0,
         module2: 1,
         module3: 2,
-        module4: 3,
-        comparaisons: 4,
-        qcm: 5,
-        scenarios: 5,
-        simulation: 5
+        services: 3,
+        module4: 4,
+        comparaisons: 5,
+        qcm: 6,
+        scenarios: 6,
+        simulation: 6
     };
     return stepMap[tabId] ?? -1;
 }
@@ -666,20 +673,14 @@ function startExamSimulation() {
         return;
     }
 
-    currentExamQuestions = selectedDifficulty === 'mixte'
-        ? [...simulationData]
-        : simulationData.filter(q => q.difficulty === selectedDifficulty);
+    currentExamMode = selectedDifficulty;
+    currentExamQuestions = getExamQuestionSet(currentExamMode);
 
-    if (currentExamQuestions.length === 0) {
-        alert("Aucune question disponible pour ce niveau de difficulté. Choisissez 'Mixte'.");
+    if (!currentExamQuestions || currentExamQuestions.length === 0) {
+        alert("Aucune question disponible pour ce mode. Choisissez un autre niveau ou réessayez plus tard.");
         return;
     }
 
-    // Ordre aléatoire à chaque démarrage (différent à chaque tentative)
-    currentExamQuestions = shuffleArray(currentExamQuestions);
-
-    // Les questions scénario restent toujours placées en fin d'examen
-    // (tri stable : l'ordre aléatoire à l'intérieur de chaque groupe est conservé)
     currentExamQuestions.sort((a, b) => (a.scenario === b.scenario) ? 0 : (a.scenario ? 1 : -1));
 
     examAnswers = {};
@@ -689,17 +690,34 @@ function startExamSimulation() {
     document.getElementById('examStartBtnWrapper').style.display = 'none';
 
     renderExamQuestions();
-    startExamTimer(90 * 60);
+    startExamTimer(currentExamMode === 'simulation' ? 90 * 60 : 20 * 60);
+}
+
+function getExamQuestionSet(mode) {
+    if (mode === 'simulation') {
+        const shuffled = shuffleArray([...simulationData]);
+        const total = Math.min(EXAM_TOTAL_QUESTIONS, shuffled.length);
+        const deck = shuffled.slice(0, total);
+        const scoredCount = Math.min(EXAM_SCORED_QUESTIONS, total);
+        return deck.map((q, index) => ({ ...q, isTestQuestion: index >= scoredCount }));
+    }
+
+    const pool = simulationData.filter(q => q.difficulty === mode);
+    return shuffleArray(pool).slice(0, PRACTICE_QUESTIONS_PER_MODE).map(q => ({ ...q, isTestQuestion: false }));
 }
 
 function renderExamQuestions() {
     const container = document.getElementById('examQuestions');
     const total = currentExamQuestions.length;
     const difficultyLabels = { facile: '🟢 Facile', moyen: '🟡 Moyen', difficile: '🔴 Difficile' };
+    const isRealSimulation = currentExamMode === 'simulation';
+    const scoredCount = currentExamQuestions.filter(q => !q.isTestQuestion).length;
+    const testCount = currentExamQuestions.filter(q => q.isTestQuestion).length;
 
     document.getElementById('examProgress').innerHTML = `
         <div class="info-box">
             <strong>📋 ${total} question${total > 1 ? 's' : ''} au total</strong>
+            ${isRealSimulation ? `<p>50 questions notées + ${testCount} questions test. Les résultats sont calculés uniquement sur les questions notées.</p>` : `<p>Mode pratique : ${total} questions de niveau ${currentExamMode}.</p>`}
             <p>Répondez à toutes les questions puis cliquez sur "Terminer l'Examen". Les scénarios complexes arrivent en fin d'examen.</p>
         </div>
     `;
@@ -796,21 +814,23 @@ function submitExam() {
     document.getElementById('examTimer').style.display = 'none';
 
     let score = 0;
-    const total = currentExamQuestions.length;
     const details = [];
 
     currentExamQuestions.forEach(q => {
         const userAnswer = (examAnswers[q.id] || []).slice().sort();
         const correctAnswer = Array.isArray(q.correct) ? [...q.correct].sort() : [q.correct];
         const isCorrect = JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
-        if (isCorrect) score++;
+        if (isCorrect && !q.isTestQuestion) score++;
         details.push({ q, userAnswer, correctAnswer, isCorrect });
     });
 
     lastExamDetails = details;
 
-    const percentage = total > 0 ? ((score / total) * 100).toFixed(1) : '0.0';
-    const passed = percentage >= 70;
+    const scoredDetails = details.filter(d => !d.q.isTestQuestion);
+    const totalScored = scoredDetails.length;
+    const scoredCorrect = scoredDetails.filter(d => d.isCorrect).length;
+    const percentage = totalScored > 0 ? ((scoredCorrect / totalScored) * 100).toFixed(1) : '0.0';
+    const passed = percentage >= EXAM_PASS_PERCENTAGE;
     const incorrectCount = details.filter(d => !d.isCorrect).length;
 
     document.getElementById('examContent').style.display = 'none';
@@ -820,16 +840,16 @@ function submitExam() {
     resultsEl.innerHTML = `
         <div class="score-card">
             <div class="emoji">${passed ? '🎉' : '📚'}</div>
-            <h2>${score} / ${total}</h2>
+            <h2>${scoredCorrect} / ${totalScored}</h2>
             <p style="font-size: 2em; margin: 20px 0;">${percentage}%</p>
-            <p style="font-size: 1.3em;">${passed ? '✅ Réussi ! (seuil : 70%)' : '❌ Non atteint (seuil : 70%)'}</p>
+            <p style="font-size: 1.3em;">${passed ? '✅ Réussi ! (seuil : ' + EXAM_PASS_PERCENTAGE + '%)' : '❌ Non atteint (seuil : ' + EXAM_PASS_PERCENTAGE + '%)'}</p>
         </div>
         <div class="module-card" style="margin-top: 20px;">
             <h3>📝 Détail des réponses</h3>
             <div class="tw flex flex-wrap gap-2 mb-5" id="examReviewFilter">
-                <button type="button" class="review-filter-btn active" data-filter="all">Toutes (${total})</button>
+                <button type="button" class="review-filter-btn active" data-filter="all">Toutes (${details.length})</button>
                 <button type="button" class="review-filter-btn" data-filter="incorrect">❌ Incorrectes (${incorrectCount})</button>
-                <button type="button" class="review-filter-btn" data-filter="correct">✅ Correctes (${score})</button>
+                <button type="button" class="review-filter-btn" data-filter="correct">✅ Correctes (${scoredCorrect})</button>
             </div>
             <div id="examReviewList"></div>
         </div>
